@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: devopshacks-dashboard
+  namespace: default 
+spec:
+  rules:
+  - host: rayspersonalkubedashboard.com
+    http:
+      paths:
+      - path: /projects  
+      backend:
+          serviceName: devopshacks-project-service
+          servicePort: 8008
+      - path: /about  
+      backend:
+          serviceName: devopshacks-about-service
+          servicePort: 8009
+
+# This ingress rules/host section is designed for the multiple paths for the same host 
+# i.e., rayspersonalkubedashboard.com/projects and rayspersonalkubedashboard.com/about for Projects and About services respectively

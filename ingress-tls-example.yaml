@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: devopshacks-dashboard
+  namespace: default 
+spec:
+  tls:
+  - hosts:
+    - rayspersonalkubedashboard.com
+    secretName: myapp-secret-tls #secret-holds-tls-reference
+  rules:
+  - host: rayspersonalkubedashboard.com
+    http:
+      paths:
+      - path: /projects  
+      backend:
+          serviceName: devopshacks-project-service
+          servicePort: 8008
+      - path: /about  
+      backend:
+          serviceName: devopshacks-about-service
+          servicePort: 8009
+
+
