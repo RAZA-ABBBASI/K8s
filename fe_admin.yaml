@@ -1,0 +1,268 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: fe-admin
+  namespace: vlogmakelaars-prod
+  labels:
+    app: fe-admin
+    tier: frontend
+    version: v1
+---
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fe-admin
+  namespace: vlogmakelaars-prod
+  labels:
+    app: fe-admin
+    tier: frontend
+    version: v1
+data:
+  be.admins.url: "https://api.vlogmakelaars.nl/admin"
+  be.applications.url: "https://api.vlogmakelaars.nl/application"
+  be.users.url: "https://api.vlogmakelaars.nl/user"
+  be.invoices.url: "https://api.vlogmakelaars.nl/invoice"
+  be.objects.url: "https://api.vlogmakelaars.nl/object"
+  be.app.base.url: "https://admin.vlogmakelaars.nl"
+  be.app.end.user.portal.base.url: "https://staging-end-user.vlogmakelaars.nl"
+  be.app.sender.key.name: "vlog_gmail_server"
+  be.app.sender.url: "https://vlog-be.apps.alpha.it22.cloud/emails/v1/senders"
+  be.app.email.template.url: "https://vlog-be.apps.alpha.it22.cloud/emails/v1/templates"
+  be.app.email.url: "https://vlog-be.apps.alpha.it22.cloud/emails/v1/emails"
+  be.app.template.url: "https://vlog-be.apps.alpha.it22.cloud/emails/v1/templates"
+  be.app.cms.url: "https://api.vlogmakelaars.nl/cms"
+  be.app.object.image.container: "test"
+  be.app.user.image.container: "userimages"
+  be.app.user.docs.container: "vlogdocs"
+  be.app.neighbourhood.container: "vlogneighbourhood"
+  be.app.teaser.container: "vlogteaser"
+  be.app.vlog.container: "vlogvlogs"
+  
+
+#  be.admins.url: "https://vlog-be.apps.alpha.it22.cloud/admins"
+#  be.applications.url: "https://vlog-be.apps.alpha.it22.cloud/applications"
+#  be.users.url: "https://vlog-be.apps.alpha.it22.cloud/users"
+#  be.invoices.url: "https://vlog-be.apps.alpha.it22.cloud/invoices"
+#  be.objects.url: "https://vlog-be.apps.alpha.it22.cloud/objects"
+---
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: fe-admin
+  namespace: vlogmakelaars-prod
+  labels:
+    app: fe-admin
+    tier: frontend
+    version: v1
+spec:
+  source:
+    type: Git
+    git:    
+      uri: 'git@bitbucket.org:it22bv/vlog-make-laars-admin-panel.git'
+      ref: master
+    contextDir: /
+    sourceSecret:
+      name: ssh-key # using ssh key secret with name ssh-key-genv2
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'fe-admin:latest' # ImageStream where build will park the output image
+  strategy:
+    type: Docker
+    dockerStrategy:
+      env:
+        - name: REACT_APP_KEYCLOAK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: fe-admin
+              key: keycloak.secret
+        - name: REACT_APP_KEYCLOAK_CLIENT
+          valueFrom:
+            secretKeyRef:
+              name: fe-admin
+              key: keycloak.client
+        - name: REACT_APP_ADMIN_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.admins.url
+        - name: REACT_APP_USERS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.users.url
+        - name: REACT_APP_APPLICATION_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.applications.url
+        - name: REACT_APP_INVOICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.invoices.url
+        - name: REACT_APP_OBJECT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.objects.url
+        - name: REACT_APP_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.base.url
+        - name: REACT_APP_END_USER_PORTAL_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.end.user.portal.base.url
+        - name: REACT_APP_SENDER_KEY_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.sender.key.name
+        - name: REACT_APP_SENDER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.sender.url
+        - name: REACT_APP_EMAIL_TEMPLATE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.email.template.url
+        - name: REACT_APP_EMAIL_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.email.url
+        - name: REACT_APP_TEMPLATE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.template.url
+        - name: REACT_APP_CMS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.cms.url
+        - name: REACT_APP_OBJECT_IMAGE_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.object.image.container
+        - name: REACT_APP_USER_IMAGE_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.user.image.container
+        - name: REACT_APP_USER_DOCS_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.user.docs.container
+        - name: REACT_APP_NEIGHBOURHOOD_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.neighbourhood.container
+        - name: REACT_APP_TEASER_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.teaser.container
+        - name: REACT_APP_VLOG_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: fe-admin
+              key: be.app.vlog.container
+      dockerfilePath: Dockerfile
+  triggers:
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
+---
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: fe-admin
+  namespace: vlogmakelaars-prod
+  labels:
+    app: fe-admin
+    tier: frontend
+    version: v1
+data:
+  keycloak.secret: ZjhkNGU5ZDMtZjQwYy00OTc3LWJlODgtZWM5MTE5Yzk3MTVm
+  keycloak.client: dmxvZy1jbGllbnQ=
+---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe-admin
+  annotations:
+    image.openshift.io/triggers: |-
+      [{"from":{"kind":"ImageStreamTag","name":"fe-admin:latest","namespace":"vlogmakelaars-prod"},"fieldPath":"spec.template.spec.containers[?(@.name==\"fe-admin\")].image","pause":"false"}]
+  namespace: vlogmakelaars-prod
+spec:
+  selector:
+    matchLabels:
+      app: fe-admin
+      tier: frontend
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fe-admin
+        tier: frontend
+        name: fe-admin
+        version: v1
+    spec:
+      containers:
+        - name: fe-admin
+          image: 'image-registry.openshift-image-registry.svc:5000/vlogmakelaars-prod/fe-admin:latest'
+          ports:
+            - containerPort: 8052
+          imagePullPolicy: Always
+#  strategy:
+#    type: RollingUpdate
+#    rollingUpdate:
+#      maxUnavailable: 25%
+#      maxSurge: 25%
+---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fe-admin
+  namespace: vlogmakelaars-prod
+  labels:
+    app: fe-admin
+    tier: frontend
+    version: v1
+spec:
+  selector:
+    app: fe-admin
+    tier: frontend
+    version: v1
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8052
+---
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fe-admin
+  labels:
+    app: fe-admin
+    tier: frontend
+    version: v1
+  namespace: vlogmakelaars-prod
